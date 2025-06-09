@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Guest{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4"><i class="fas fa-user-edit"></i> Edit Guest</h1>
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('guest.edit', ref=guest.ref) }}">
+            <div class="mb-3">
+                <label for="name" class="form-label">Guest Name</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ guest.name }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="guest_count" class="form-label">Number of Guests</label>
+                <input type="number" min="1" class="form-control" id="guest_count" name="guest_count" value="{{ guest.guest }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="id_type" class="form-label">ID Type</label>
+                <input type="text" class="form-control" id="id_type" name="id_type" value="{{ guest.id_type }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="id_number" class="form-label">ID Number</label>
+                <input type="text" class="form-control" id="id_number" name="id_number" value="{{ guest.id_no }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="gender" class="form-label">Gender</label>
+                <select class="form-select" id="gender" name="gender" required>
+                    <option value="Male" {% if guest.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if guest.gender == 'Female' %}selected{% endif %}>Female</option>
+                    <option value="Other" {% if guest.gender == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="age" class="form-label">Age</label>
+                <input type="number" min="0" max="120" class="form-control" id="age" name="age" value="{{ guest.age }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="contact" class="form-label">Contact</label>
+                <input type="text" class="form-control" id="contact" name="contact" value="{{ guest.contact }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <textarea class="form-control" id="address" name="address" rows="2" required>{{ guest.address }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="floor" class="form-label">Floor</label>
+                <select class="form-select" id="floor" name="floor" required>
+                    <option value="" disabled>Select floor</option>
+                    {% for floor in floors %}
+                    <option value="{{ floor }}" {% if guest.floor == floor %}selected{% endif %}>{{ floor }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="room" class="form-label">Room</label>
+                <select class="form-select" id="room" name="room" required>
+                    <option value="" disabled selected>Select room</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="image" class="form-label">Profile Image</label>
+                <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                {% if guest.images %}
+                <img src="{{ url_for('static', filename='uploads/guest_images/' ~ guest.images) }}" alt="Profile Image" class="img-thumbnail mt-2" style="max-width: 150px;">
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary">Update Guest</button>
+        </form>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+function loadRooms(floor, selectedRoom) {
+    const roomSelect = document.getElementById('room');
+    roomSelect.innerHTML = '<option value="" disabled>Loading...</option>';
+
+    fetch(`/room/get-rooms/${floor}`)
+        .then(response => response.json())
+        .then(data => {
+            roomSelect.innerHTML = '<option value="" disabled>Select room</option>';
+            data.rooms.forEach(room => {
+                const option = document.createElement('option');
+                option.value = room;
+                option.textContent = room;
+                if (room === selectedRoom) {
+                    option.selected = true;
+                }
+                roomSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            roomSelect.innerHTML = '<option value="" disabled selected>Error loading rooms</option>';
+            console.error('Error loading rooms:', error);
+        });
+}
+
+document.getElementById('floor').addEventListener('change', function() {
+    loadRooms(this.value, '');
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+    const floor = document.getElementById('floor').value;
+    const room = "{{ guest.room }}";
+    if (floor) {
+        loadRooms(floor, room);
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

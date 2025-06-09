@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Staff Member{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4"><i class="fas fa-user-edit"></i> Edit Staff Member</h1>
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('staff.edit', emp_id=staff.emp_id) }}">
+            <div class="mb-3">
+                <label for="full_name" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="full_name" name="full_name" value="{{ staff.full_name }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="id_type" class="form-label">ID Type</label>
+                <input type="text" class="form-control" id="id_type" name="id_type" value="{{ staff.id_type }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="id_number" class="form-label">ID Number</label>
+                <input type="text" class="form-control" id="id_number" name="id_number" value="{{ staff.id_number }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="gender" class="form-label">Gender</label>
+                <select class="form-select" id="gender" name="gender" required>
+                    <option value="Male" {% if staff.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if staff.gender == 'Female' %}selected{% endif %}>Female</option>
+                    <option value="Other" {% if staff.gender == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="age" class="form-label">Age</label>
+                <input type="number" min="18" max="100" class="form-control" id="age" name="age" value="{{ staff.age }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="contact" class="form-label">Contact</label>
+                <input type="text" class="form-control" id="contact" name="contact" value="{{ staff.contact }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <textarea class="form-control" id="address" name="address" rows="2" required>{{ staff.address }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="department" class="form-label">Department</label>
+                <select class="form-select" id="department" name="department" required>
+                    <option value="" disabled>Select department</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.department }}" {% if staff.department == dept.department %}selected{% endif %}>{{ dept.department }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="designation" class="form-label">Designation</label>
+                <select class="form-select" id="designation" name="designation" required>
+                    <option value="" disabled selected>Select designation</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="joining_date" class="form-label">Joining Date</label>
+                <input type="date" class="form-control" id="joining_date" name="joining_date" value="{{ staff.joining_date }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="salary" class="form-label">Salary</label>
+                <input type="number" step="0.01" class="form-control" id="salary" name="salary" value="{{ staff.salary }}" required readonly>
+            </div>
+            <div class="mb-3">
+                <label for="image" class="form-label">Profile Image</label>
+                <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                {% if staff.image %}
+                <img src="{{ url_for('static', filename='uploads/staff_images/' ~ staff.image) }}" alt="Profile Image" class="img-thumbnail mt-2" style="max-width: 150px;">
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary">Update Staff Member</button>
+        </form>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+function loadDesignations(department, selectedDesignation, selectedSalary) {
+    const designationSelect = document.getElementById('designation');
+    const salaryInput = document.getElementById('salary');
+
+    designationSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
+    salaryInput.value = '';
+
+    fetch(`/staff/get-designations/${department}`)
+        .then(response => response.json())
+        .then(data => {
+            designationSelect.innerHTML = '<option value="" disabled>Select designation</option>';
+            data.designations.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.designation;
+                option.textContent = item.designation;
+                option.dataset.salary = item.salary;
+                if (item.designation === selectedDesignation) {
+                    option.selected = true;
+                    salaryInput.value = selectedSalary;
+                }
+                designationSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            designationSelect.innerHTML = '<option value="" disabled selected>Error loading designations</option>';
+            console.error('Error loading designations:', error);
+        });
+}
+
+document.getElementById('department').addEventListener('change', function() {
+    loadDesignations(this.value, '', '');
+});
+
+// Load designations on page load with current staff data
+window.addEventListener('DOMContentLoaded', function() {
+    const department = document.getElementById('department').value;
+    const designation = "{{ staff.designation }}";
+    const salary = "{{ staff.salary }}";
+    if (department) {
+        loadDesignations(department, designation, salary);
+    }
+});
+
+document.getElementById('designation').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const salary = selectedOption.dataset.salary || '';
+    document.getElementById('salary').value = salary;
+});
+</script>
+{% endblock %}
+{% endblock %}

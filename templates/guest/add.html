@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Add Guest{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-user-plus"></i> Add New Guest</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="guest_count" class="form-label">Number of Guests *</label>
+                                <input type="number" class="form-control" id="guest_count" name="guest_count" min="1" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_type" class="form-label">ID Type *</label>
+                                <select class="form-select" id="id_type" name="id_type" required>
+                                    <option value="">Choose ID Type</option>
+                                    <option value="Aadharcard">Aadhar Card</option>
+                                    <option value="Pancard">PAN Card</option>
+                                    <option value="Driving Licence">Driving License</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_number" class="form-label">ID Number *</label>
+                                <input type="text" class="form-control" id="id_number" name="id_number" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Gender *</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="gender" id="male" value="Male" required>
+                                        <label class="form-check-label" for="male">Male</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="gender" id="female" value="Female" required>
+                                        <label class="form-check-label" for="female">Female</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="age" class="form-label">Date of Birth *</label>
+                                <input type="date" class="form-control" id="age" name="age" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="contact" class="form-label">Contact Number *</label>
+                                <input type="tel" class="form-control" id="contact" name="contact" pattern="[0-9]{10}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="image" class="form-label">Photo</label>
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*" style="display:none;">
+                                <video id="video" width="100%" height="240" autoplay muted playsinline style="border:3px solid orange; border-radius:5px; display:none;"></video>
+                                <button type="button" id="capture-btn" class="btn btn-secondary mt-2">Open Camera</button>
+                                <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address *</label>
+                        <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('guest.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Guest
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ID validation
+document.getElementById('id_type').addEventListener('change', function() {
+    const idNumberField = document.getElementById('id_number');
+    const idType = this.value;
+    
+    if (idType === 'Aadharcard') {
+        idNumberField.setAttribute('pattern', '[0-9]{12}');
+        idNumberField.setAttribute('maxlength', '12');
+        idNumberField.setAttribute('placeholder', '12-digit Aadhar number');
+    } else if (idType === 'Pancard') {
+        idNumberField.setAttribute('pattern', '[A-Z]{5}[0-9]{4}[A-Z]{1}');
+        idNumberField.setAttribute('maxlength', '10');
+        idNumberField.setAttribute('placeholder', 'PAN format: ABCDE1234F');
+    } else if (idType === 'Driving Licence') {
+        idNumberField.setAttribute('pattern', '[A-Z0-9]{15}');
+        idNumberField.setAttribute('maxlength', '15');
+        idNumberField.setAttribute('placeholder', '15-character license number');
+    }
+});
+
+// Age validation
+document.getElementById('age').addEventListener('change', function() {
+    const birthDate = new Date(this.value);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    
+    if (age < 18) {
+        alert('Guest must be at least 18 years old');
+        this.focus();
+    }
+});
+</script>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('capture-btn');
+    const imageInput = document.getElementById('image');
+
+    let stream = null;
+    captureBtn.addEventListener('click', () => {
+        if (video.style.display === 'none') {
+            // Open camera
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(s => {
+                    stream = s;
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    video.style.borderColor = 'orange';
+                    captureBtn.textContent = 'Capture Photo';
+                })
+                .catch(err => {
+                    console.error('Error accessing camera: ', err);
+                    alert('Could not access camera.');
+                });
+        } else {
+            // Capture photo
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => {
+                // Create a file from the blob and set it to the file input
+                const file = new File([blob], 'captured_photo.png', { type: 'image/png' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                imageInput.files = dataTransfer.files;
+
+                // Stop camera stream
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+
+                // Hide video and disable button
+                video.style.display = 'none';
+                video.style.borderColor = '#ccc';
+                captureBtn.disabled = true;
+                captureBtn.textContent = 'Photo Captured';
+            }, 'image/png');
+        }
+    });
+</script>
+{% endblock %}

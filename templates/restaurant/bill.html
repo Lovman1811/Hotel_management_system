@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Restaurant Bill{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body" id="billContent">
+                <!-- Hotel Header -->
+                <div class="text-center mb-4">
+                    <h2 class="text-primary">LovMan Hotel</h2>
+                    <p class="mb-1">Address: Hajipur, 144221</p>
+                    <p class="mb-1">GST.NO:- 27AHXPP3379H1ZH</p>
+                </div>
+                
+                <!-- Bill Info -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>Date:</strong> {{ date }}</p>
+                        <p><strong>Customer Name:</strong> {{ customer_name }}</p>
+                        <p><strong>Customer Contact:</strong> {{ customer_contact }}</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        {% if qr_path %}
+                        <img src="{{ url_for('static', filename='temp/qr_code.png') }}" alt="Payment QR Code" style="width: 100px; height: 100px;">
+                        <p><small>Scan to Pay</small></p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Order Items -->
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Description</th>
+                            <th>Rate</th>
+                            <th>Quantity</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>₹{{ item.price }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₹{{ item.total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <th colspan="3" class="text-end">Total Amount:</th>
+                            <th>₹{{ total }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                
+                <div class="text-center mt-4">
+                    <h4 class="text-success">Total Price: Rs. {{ total }} /-</h4>
+                </div>
+            </div>
+            
+            <div class="card-footer text-center">
+                <button class="btn btn-primary me-2" onclick="printBill()">
+                    <i class="fas fa-print"></i> Print Bill
+                </button>
+                <a href="{{ url_for('restaurant.clear_order') }}" class="btn btn-success me-2">
+                    <i class="fas fa-check"></i> New Order
+                </a>
+                <a href="{{ url_for('restaurant.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Restaurant
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function printBill() {
+    const printContent = document.getElementById('billContent').innerHTML;
+    const originalContent = document.body.innerHTML;
+    
+    document.body.innerHTML = printContent;
+    window.print();
+    document.body.innerHTML = originalContent;
+    location.reload();
+}
+</script>
+{% endblock %}

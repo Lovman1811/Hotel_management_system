@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Room Booking{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4"><i class="fas fa-bed"></i> Room Booking</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Add New Booking</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('room.add_booking') }}">
+                    <div class="mb-3">
+                        <label for="contact" class="form-label">Contact</label>
+                        <input type="text" class="form-control" id="contact" name="contact" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="room_type" class="form-label">Room Type</label>
+                        <select class="form-select" id="room_type" name="room_type" required>
+                            <option value="" disabled selected>Select room type</option>
+                            <option value="Single">Single</option>
+                            <option value="Double">Double</option>
+                            <option value="Suite">Suite</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="floor" class="form-label">Floor</label>
+                        <select class="form-select" id="floor" name="floor" required>
+                            <option value="" disabled selected>Select floor</option>
+                    {% for floor in floors %}
+                    <option value="{{ floor }}">{{ floor }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="room" class="form-label">Room</label>
+                <select class="form-select" id="room" name="room" required>
+                    <option value="" disabled selected>Select room</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="check_in" class="form-label">Check-in Date</label>
+                <input type="date" class="form-control" id="check_in" name="check_in" required>
+            </div>
+            <div class="mb-3">
+                <label for="check_out" class="form-label">Check-out Date</label>
+                <input type="date" class="form-control" id="check_out" name="check_out" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Booking</button>
+        </form>
+    </div>
+</div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Current Bookings</div>
+            <div class="card-body">
+                {% if bookings %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Contact</th>
+                            <th>Room Type</th>
+                            <th>Floor</th>
+                            <th>Room</th>
+                            <th>Status</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.id }}</td>
+                            <td>{{ booking.contact }}</td>
+                            <td>{{ booking.room_type }}</td>
+                            <td>{{ booking.floor }}</td>
+                            <td>{{ booking.room }}</td>
+                            <td>
+                                {% if booking.status == 'cleaned' %}
+                                    <span class="badge bg-success">Cleaned</span>
+                                {% elif booking.status == 'not cleaned' %}
+                                    <span class="badge bg-warning text-dark">Not Cleaned</span>
+                                {% elif booking.status == 'booked' %}
+                                    <span class="badge bg-danger">Booked</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Unknown</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ booking.check_in }}</td>
+                            <td>
+                                <form method="POST" action="{{ url_for('room.update_checkout') }}" class="d-flex align-items-center">
+                                    <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                                    <input type="date" name="check_out" value="{{ booking.check_out }}" class="form-control form-control-sm me-2" required>
+                                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No bookings found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.getElementById('floor').addEventListener('change', function() {
+    const floor = this.value;
+    const roomSelect = document.getElementById('room');
+    roomSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
+
+    fetch(`/room/get-rooms/${floor}`)
+        .then(response => response.json())
+        .then(data => {
+            roomSelect.innerHTML = '<option value="" disabled selected>Select room</option>';
+            data.rooms.forEach(room => {
+                const option = document.createElement('option');
+                option.value = room;
+                option.textContent = room;
+                roomSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            roomSelect.innerHTML = '<option value="" disabled selected>Error loading rooms</option>';
+            console.error('Error loading rooms:', error);
+        });
+});
+</script>
+{% endblock %}
+{% endblock %}

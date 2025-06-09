@@ -1,0 +1,817 @@
+{% extends "base.html" %}
+
+{% block title %}Login & Online Registration{% endblock %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+
+    .input-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .input-field.error {
+        border-color: #ef4444;
+        background-color: #fef2f2;
+    }
+
+    .input-field.valid {
+        border-color: #10b981;
+        background-color: #f0fdf4;
+    }
+
+    .input-label {
+        position: absolute;
+        top: -8px;
+        left: 12px;
+        background: white;
+        padding: 0 4px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #6b7280;
+        transition: all 0.3s ease;
+    }
+
+    .error-message {
+        color: #ef4444;
+        font-size: 12px;
+        margin-top: 4px;
+        display: none;
+    }
+
+    .success-message {
+        color: #10b981;
+        font-size: 12px;
+        margin-top: 4px;
+        display: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+        transform: translateY(-1px);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6b7280;
+    }
+
+    .password-strength {
+        margin-top: 8px;
+        display: none;
+    }
+
+    .strength-bar {
+        height: 4px;
+        border-radius: 2px;
+        background: #e5e7eb;
+        overflow: hidden;
+    }
+
+    .strength-fill {
+        height: 100%;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .loading-spinner {
+        border: 2px solid #f3f4f6;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        animation: spin 1s linear infinite;
+        display: none;
+        margin-right: 8px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .otp-timer {
+        font-size: 12px;
+        color: #ef4444;
+        margin-top: 4px;
+        display: none;
+    }
+
+    .feature-highlight {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .tab-container {
+        display: flex;
+        background: #f3f4f6;
+        border-radius: 8px;
+        padding: 4px;
+        margin-bottom: 20px;
+    }
+
+    .tab-button {
+        flex: 1;
+        padding: 8px 16px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .tab-button.active {
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: #667eea;
+    }
+
+    .social-login {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .social-btn {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .social-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .divider span {
+        padding: 0 16px;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 16px;
+        }
+
+        .glass-card {
+            margin-bottom: 20px;
+        }
+    }
+</style>
+
+<div class="gradient-bg">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">
+                <i class="fas fa-hotel mr-3"></i>Hotel Management Portal
+            </h1>
+            <p class="text-gray-200">Secure Login & Guest Registration System</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-wrap justify-center gap-8">
+            <!-- Login Card -->
+            <div class="w-full max-w-md">
+                <div class="glass-card rounded-2xl p-8">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                            <i class="fas fa-sign-in-alt text-2xl text-blue-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800">Staff Login</h3>
+                        <p class="text-gray-600 text-sm">Access your account securely</p>
+                    </div>
+
+                    <!-- Social Login Options -->
+
+
+                    <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm" novalidate>
+                        <div class="input-group">
+                            <label class="input-label">Employee ID</label>
+                            <input type="text" class="input-field" id="emp_id" name="emp_id" required>
+                            <div class="error-message" id="emp_id_error"></div>
+                        </div>
+
+                        <div class="input-group" style="position: relative;">
+                            <label class="input-label">Password</label>
+                            <input type="password" class="input-field" id="password" name="password" required>
+                            <i class="fas fa-eye password-toggle" id="passwordToggle"></i>
+                            <div class="error-message" id="password_error"></div>
+                            <div class="password-strength" id="passwordStrength">
+                                <div class="strength-bar">
+                                    <div class="strength-fill" id="strengthFill"></div>
+                                </div>
+                                <div class="text-xs mt-1" id="strengthText"></div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">User Type</label>
+                            <select class="input-field" id="user_type" name="user_type" required>
+                                <option value="" disabled selected>Select user type</option>
+                                <option value="Admin">👑 Admin</option>
+                                <option value="Staff">👤 Staff</option>
+                                <option value="Guest">🏨 Guest</option>
+                            </select>
+                            <div class="error-message" id="user_type_error"></div>
+                        </div>
+
+                        <div class="flex items-center justify-between mb-6">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2" id="remember_me" name="remember_me">
+                                <span class="text-sm text-gray-600">Remember me</span>
+                            </label>
+                            <a href="#" class="text-sm text-blue-600 hover:underline">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" class="btn-primary w-full text-white font-semibold py-3 rounded-lg">
+                            <div class="loading-spinner" id="loginSpinner"></div>
+                            <span id="loginButtonText">
+                                <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                            </span>
+                        </button>
+
+                        <!-- Security Features -->
+                        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-shield-alt text-green-500 mr-2"></i>
+                                <span>Secured with 256-bit SSL encryption</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Registration Card -->
+            <div class="w-full max-w-md">
+                <div class="glass-card rounded-2xl p-8">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                            <i class="fas fa-user-plus text-2xl text-green-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800">Guest Registration</h3>
+                        <p class="text-gray-600 text-sm">Book your stay with us</p>
+                    </div>
+
+                    <!-- Feature Highlights -->
+                    <div class="feature-highlight">
+                        <div class="flex items-center text-sm text-gray-700 mb-2">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            <span>Instant booking confirmation</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-700">
+                            <i class="fas fa-envelope text-blue-500 mr-2"></i>
+                            <span>Email verification required</span>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('auth.register') }}" id="registrationForm" novalidate>
+                        <div class="input-group">
+                            <label class="input-label">Full Name</label>
+                            <input type="text" class="input-field" id="name" name="name" required>
+                            <div class="error-message" id="name_error"></div>
+                            <div class="success-message" id="name_success"></div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Email Address</label>
+                            <input type="email" class="input-field" id="email" name="email" required>
+                            <div class="error-message" id="email_error"></div>
+                            <div class="success-message" id="email_success"></div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Contact Number</label>
+                            <input type="tel" class="input-field" id="contact" name="contact" required>
+                            <div class="error-message" id="contact_error"></div>
+                            <div class="success-message" id="contact_success"></div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <div class="input-group flex-1">
+                                <label class="input-label">Check-in Date</label>
+                                <input type="date" class="input-field" id="check_in" name="check_in" required>
+                                <div class="error-message" id="check_in_error"></div>
+                            </div>
+
+                            <div class="input-group flex-1">
+                                <label class="input-label">Check-out Date</label>
+                                <input type="date" class="input-field" id="check_out" name="check_out" required>
+                                <div class="error-message" id="check_out_error"></div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">Room Preference</label>
+                            <select class="input-field" id="room_type" name="room_type">
+                                <option value="">Select room type (optional)</option>
+                                <option value="standard">🛏️ Standard Room</option>
+                                <option value="deluxe">🏩 Deluxe Room</option>
+                                <option value="suite">🏨 Suite</option>
+                                <option value="presidential">👑 Presidential Suite</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="input-label">OTP Verification</label>
+                            <input type="text" class="input-field" id="otp" name="otp" maxlength="6" placeholder="Enter 6-digit OTP">
+                            <div class="error-message" id="otp_error"></div>
+                            <div class="otp-timer" id="otpTimer"></div>
+                        </div>
+
+                        <button type="button" id="sendOtpBtn" class="btn-secondary w-full mb-4 text-white font-semibold py-2 rounded-lg">
+                            <div class="loading-spinner" id="otpSpinner"></div>
+                            <span id="otpButtonText">
+                                <i class="fas fa-envelope mr-2"></i>Send OTP
+                            </span>
+                        </button>
+
+                        <div class="mb-4">
+                            <label class="flex items-start">
+                                <input type="checkbox" class="mt-1 mr-2" id="terms_accepted" required>
+                                <span class="text-sm text-gray-600">
+                                    I agree to the <a href="#" class="text-blue-600 hover:underline">Terms of Service</a>
+                                    and <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2" id="newsletter" name="newsletter">
+                                <span class="text-sm text-gray-600">Subscribe to our newsletter for special offers</span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn-success w-full text-white font-semibold py-3 rounded-lg">
+                            <div class="loading-spinner" id="registerSpinner"></div>
+                            <span id="registerButtonText">
+                                <i class="fas fa-user-plus mr-2"></i>Complete Registration
+                            </span>
+                        </button>
+
+                        <!-- Trust Indicators -->
+                        <div class="mt-4 text-center">
+                            <div class="flex items-center justify-center text-sm text-gray-500">
+                                <i class="fas fa-lock mr-2"></i>
+                                <span>Your data is protected and encrypted</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="text-center mt-12">
+            <div class="glass-card rounded-xl p-6 max-w-2xl mx-auto">
+                <h4 class="text-lg font-semibold text-gray-800 mb-4">Need Help?</h4>
+                <div class="flex flex-wrap justify-center gap-6 text-sm">
+                    <a href="#" class="flex items-center text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-phone mr-2"></i>Call Support: +1-800-HOTEL
+                    </a>
+                    <a href="#" class="flex items-center text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-envelope mr-2"></i>support@hotel.com
+                    </a>
+                    <a href="#" class="flex items-center text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-question-circle mr-2"></i>FAQ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+// Enhanced JavaScript functionality
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Form validation patterns
+    const patterns = {
+        email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        phone: /^[\+]?[1-9][\d]{0,15}$/,
+        empId: /^[A-Za-z0-9]{3,10}$/,
+        name: /^[a-zA-Z\s]{2,50}$/
+    };
+
+    // Password strength checker
+    function checkPasswordStrength(password) {
+        let score = 0;
+        let feedback = [];
+
+        if (password.length >= 8) score++;
+        else feedback.push('At least 8 characters');
+
+        if (/[a-z]/.test(password)) score++;
+        else feedback.push('Lowercase letter');
+
+        if (/[A-Z]/.test(password)) score++;
+        else feedback.push('Uppercase letter');
+
+        if (/[0-9]/.test(password)) score++;
+        else feedback.push('Number');
+
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        else feedback.push('Special character');
+
+        return { score, feedback };
+    }
+
+    // Password toggle functionality
+    document.getElementById('passwordToggle').addEventListener('click', function() {
+        const passwordField = document.getElementById('password');
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        this.className = type === 'password' ? 'fas fa-eye password-toggle' : 'fas fa-eye-slash password-toggle';
+    });
+
+    // Real-time password strength validation
+    document.getElementById('password').addEventListener('input', function() {
+        const password = this.value;
+        const strengthDiv = document.getElementById('passwordStrength');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
+
+        if (password.length > 0) {
+            strengthDiv.style.display = 'block';
+            const { score, feedback } = checkPasswordStrength(password);
+
+            const colors = ['#ef4444', '#f59e0b', '#eab308', '#10b981', '#059669'];
+            const labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+
+            strengthFill.style.width = (score * 20) + '%';
+            strengthFill.style.backgroundColor = colors[score - 1] || colors[0];
+            strengthText.textContent = labels[score - 1] || labels[0];
+
+            if (feedback.length > 0) {
+                strengthText.textContent += ' (Need: ' + feedback.join(', ') + ')';
+            }
+        } else {
+            strengthDiv.style.display = 'none';
+        }
+    });
+
+    // Real-time form validation
+    function validateField(fieldId, pattern, errorMsg) {
+        const field = document.getElementById(fieldId);
+        const errorDiv = document.getElementById(fieldId + '_error');
+        const successDiv = document.getElementById(fieldId + '_success');
+
+        field.addEventListener('blur', function() {
+            const value = this.value.trim();
+
+            if (!value && this.required) {
+                this.classList.add('error');
+                this.classList.remove('valid');
+                if (errorDiv) {
+                    errorDiv.textContent = 'This field is required';
+                    errorDiv.style.display = 'block';
+                }
+                if (successDiv) successDiv.style.display = 'none';
+            } else if (pattern && !pattern.test(value) && value) {
+                this.classList.add('error');
+                this.classList.remove('valid');
+                if (errorDiv) {
+                    errorDiv.textContent = errorMsg;
+                    errorDiv.style.display = 'block';
+                }
+                if (successDiv) successDiv.style.display = 'none';
+            } else if (value) {
+                this.classList.remove('error');
+                this.classList.add('valid');
+                if (errorDiv) errorDiv.style.display = 'none';
+                if (successDiv) {
+                    successDiv.textContent = 'Looks good!';
+                    successDiv.style.display = 'block';
+                }
+            }
+        });
+    }
+
+    // Apply validation to fields
+    validateField('emp_id', patterns.empId, 'Employee ID must be 3-10 alphanumeric characters');
+    validateField('email', patterns.email, 'Please enter a valid email address');
+    validateField('contact', patterns.phone, 'Please enter a valid phone number');
+    validateField('name', patterns.name, 'Name must be 2-50 characters, letters only');
+
+    // Date validation
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('check_in').setAttribute('min', today);
+
+    document.getElementById('check_in').addEventListener('change', function() {
+        const checkIn = new Date(this.value);
+        const tomorrow = new Date(checkIn);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('check_out').setAttribute('min', tomorrow.toISOString().split('T')[0]);
+    });
+
+    // Enhanced OTP functionality
+    let otpTimer;
+    let otpTimeLeft = 0;
+
+    function startOtpTimer() {
+        otpTimeLeft = 300; // 5 minutes
+        const timerDiv = document.getElementById('otpTimer');
+        const sendBtn = document.getElementById('sendOtpBtn');
+
+        timerDiv.style.display = 'block';
+        sendBtn.disabled = true;
+        sendBtn.classList.add('opacity-50');
+
+        otpTimer = setInterval(() => {
+            const minutes = Math.floor(otpTimeLeft / 60);
+            const seconds = otpTimeLeft % 60;
+            timerDiv.textContent = `Resend OTP in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            if (otpTimeLeft <= 0) {
+                clearInterval(otpTimer);
+                timerDiv.style.display = 'none';
+                sendBtn.disabled = false;
+                sendBtn.classList.remove('opacity-50');
+                document.getElementById('otpButtonText').innerHTML = '<i class="fas fa-envelope mr-2"></i>Resend OTP';
+            }
+            otpTimeLeft--;
+        }, 1000);
+    }
+
+    // Enhanced send OTP functionality
+    document.getElementById('sendOtpBtn').addEventListener('click', function() {
+        const email = document.getElementById('email').value;
+        const name = document.getElementById('name').value;
+
+        if (!email) {
+            showNotification('Please enter your email address to receive OTP.', 'error');
+            document.getElementById('email').focus();
+            return;
+        }
+
+        if (!patterns.email.test(email)) {
+            showNotification('Please enter a valid email address.', 'error');
+            document.getElementById('email').focus();
+            return;
+        }
+
+        const spinner = document.getElementById('otpSpinner');
+        const buttonText = document.getElementById('otpButtonText');
+
+        spinner.style.display = 'inline-block';
+        buttonText.innerHTML = 'Sending...';
+        this.disabled = true;
+
+        fetch('{{ url_for("auth.send_otp") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                name: name || 'Guest'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            spinner.style.display = 'none';
+
+            if (data.success) {
+                showNotification('OTP sent successfully! Please check your email inbox.', 'success');
+                startOtpTimer();
+                document.getElementById('otp').focus();
+            } else {
+                showNotification('Failed to send OTP: ' + (data.error || 'Unknown error'), 'error');
+                buttonText.innerHTML = '<i class="fas fa-envelope mr-2"></i>Send OTP';
+                this.disabled = false;
+            }
+        })
+        .catch(error => {
+            spinner.style.display = 'none';
+            buttonText.innerHTML = '<i class="fas fa-envelope mr-2"></i>Send OTP';
+            this.disabled = false;
+            showNotification('Error sending OTP. Please try again.', 'error');
+            console.error('Error:', error);
+        });
+    });
+
+    // Form submission with loading states
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        const spinner = document.getElementById('loginSpinner');
+        const buttonText = document.getElementById('loginButtonText');
+        const submitBtn = this.querySelector('button[type="submit"]');
+
+        spinner.style.display = 'inline-block';
+        buttonText.innerHTML = 'Signing In...';
+        submitBtn.disabled = true;
+    });
+
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        const termsAccepted = document.getElementById('terms_accepted').checked;
+
+        if (!termsAccepted) {
+            e.preventDefault();
+            showNotification('Please accept the terms and conditions to continue.', 'error');
+            return;
+        }
+
+        const spinner = document.getElementById('registerSpinner');
+        const buttonText = document.getElementById('registerButtonText');
+        const submitBtn = this.querySelector('button[type="submit"]');
+
+        spinner.style.display = 'inline-block';
+        buttonText.innerHTML = 'Processing...';
+        submitBtn.disabled = true;
+    });
+
+    // Notification system
+    function showNotification(message, type = 'info') {
+        // Remove existing notifications
+        const existing = document.querySelector('.notification');
+        if (existing) existing.remove();
+
+        const notification = document.createElement('div');
+        notification.className = `notification fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm ${
+            type === 'success' ? 'bg-green-500 text-white' :
+            type === 'error' ? 'bg-red-500 text-white' :
+            'bg-blue-500 text-white'
+        }`;
+
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas ${
+                    type === 'success' ? 'fa-check-circle' :
+                    type === 'error' ? 'fa-exclamation-triangle' :
+                    'fa-info-circle'
+                } mr-2"></i>
+                <span>${message}</span>
+                <button class="ml-auto text-white hover:text-gray-200" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Phone number formatting
+    document.getElementById('contact').addEventListener('input', function() {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length >= 10) {
+            value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+        }
+        this.value = value;
+    });
+
+    // Auto-capitalize name field
+    document.getElementById('name').addEventListener('input', function() {
+        this.value = this.value.replace(/\b\w/g, l => l.toUpperCase());
+    });
+
+    // Social login handlers (placeholder functionality)
+    document.querySelectorAll('.social-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const provider = this.textContent.trim();
+            showNotification(`${provider} login integration coming soon!`, 'info');
+        });
+    });
+
+    // Initialize date fields with proper constraints
+    const checkinField = document.getElementById('check_in');
+    const checkoutField = document.getElementById('check_out');
+
+    checkinField.addEventListener('change', function() {
+        const checkinDate = new Date(this.value);
+        const minCheckout = new Date(checkinDate);
+        minCheckout.setDate(minCheckout.getDate() + 1);
+
+        checkoutField.min = minCheckout.toISOString().split('T')[0];
+
+        if (checkoutField.value && new Date(checkoutField.value) <= checkinDate) {
+            checkoutField.value = minCheckout.toISOString().split('T')[0];
+        }
+    });
+
+    // Auto-focus next field after OTP entry
+    document.getElementById('otp').addEventListener('input', function() {
+        if (this.value.length === 6) {
+            // OTP complete, validate format
+            if (!/^\d{6}$/.test(this.value)) {
+                showNotification('OTP must be 6 digits', 'error');
+            }
+        }
+    });
+
+    console.log('Professional Hotel Management Portal initialized successfully!');
+});
+</script>
+{% endblock %}
+{% endblock %}

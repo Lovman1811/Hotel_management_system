@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Restaurant Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="fas fa-utensils"></i> Hotel Restaurant</h2>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Customer Information -->
+    <div class="col-12 mb-3">
+        <div class="card">
+            <div class="card-header">
+                <h5>Customer Information</h5>
+            </div>
+            <div class="card-body">
+                <form id="customerForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="customer_name" placeholder="Customer Name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="tel" class="form-control" id="customer_contact" placeholder="Contact Number" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Menu Section -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Menu</h5>
+            </div>
+            <div class="card-body menu-section" style="max-height: 600px; overflow-y: auto;">
+                {% for category, items in menu.items() %}
+                <div class="menu-category mb-4">
+                    <h6 class="text-primary border-bottom pb-2">{{ category }}</h6>
+                    {% for item_id, item in items.items() %}
+                    <div class="menu-item d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                        <div>
+                            <strong>{{ item.name }}</strong>
+                            <div class="text-muted">₹{{ item.price }}</div>
+                        </div>
+                        <button class="btn btn-sm btn-primary" onclick="selectItem('{{ item.name }}', {{ item.price }})">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Order Section -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Current Order</h5>
+            </div>
+            <div class="card-body">
+                <!-- Item Selection Form -->
+                <form id="orderForm" class="mb-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Item</label>
+                            <input type="text" class="form-control" id="selected_item" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="quantity" value="1" min="1">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Price</label>
+                            <input type="text" class="form-control" id="item_price" readonly>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-success me-2" onclick="addToOrder()">
+                            <i class="fas fa-plus"></i> Add to Order
+                        </button>
+                        <button type="button" class="btn btn-warning me-2" onclick="clearOrder()">
+                            <i class="fas fa-trash"></i> Clear Order
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Order Items -->
+                <div class="order-items">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody">
+                            {% for item in order %}
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>₹{{ item.price }}</td>
+                                <td>₹{{ item.total }}</td>
+                                <td>
+                                    <a href="{{ url_for('restaurant.remove_from_order', index=loop.index0) }}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    <div class="border-top pt-2">
+                        <h5>Total: ₹<span id="orderTotal">{{ order | sum(attribute='total') | round(2) }}</span></h5>
+                    </div>
+                    
+                    {% if order %}
+                    <button type="button" class="btn btn-primary mt-2" onclick="generateBill()">
+                        <i class="fas fa-receipt"></i> Generate Bill
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedItemPrice = 0;
+
+function selectItem(name, price) {
+    document.getElementById('selected_item').value = name;
+    document.getElementById('item_price').value = '₹' + price;
+    selectedItemPrice = price;
+    document.getElementById('quantity').value = 1;
+}
+
+function addToOrder() {
+    const itemName = document.getElementById('selected_item').value;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    
+    if (!itemName) {
+        alert('Please select an item first');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('item_name', itemName);
+    formData.append('price', selectedItemPrice);
+    formData.append('quantity', quantity);
+    
+    fetch('/restaurant/add-to-order', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error adding item to order');
+    });
+}
+
+function clearOrder() {
+    if (confirm('Are you sure you want to clear the entire order?')) {
+        window.location.href = '/restaurant/clear-order';
+    }
+}
+
+function generateBill() {
+    const customerName = document.getElementById('customer_name').value;
+    const customerContact = document.getElementById('customer_contact').value;
+    
+    if (!customerName || !customerContact) {
+        alert('Please enter customer name and contact number');
+        return;
+    }
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/restaurant/generate-bill';
+    
+    const nameInput = document.createElement('input');
+    nameInput.type = 'hidden';
+    nameInput.name = 'customer_name';
+    nameInput.value = customerName;
+    
+    const contactInput = document.createElement('input');
+    contactInput.type = 'hidden';
+    contactInput.name = 'customer_contact';
+    contactInput.value = customerContact;
+    
+    form.appendChild(nameInput);
+    form.appendChild(contactInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guest Bookings - Grand Plaza Hotel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-hotel"></i>
+            <span class="logo-text">Grand Plaza Hotel</span>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('auth.login') }}">Login</a>
+            <a href="{{ url_for('guest.bookings') }}">Check Bookings</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Check Your Bookings</h1>
+        <p>Enter your email or contact number to view your bookings.</p>
+        <form method="POST" action="{{ url_for('guest.bookings') }}" class="booking-check-form">
+            <div class="form-group">
+                <label for="identifier">Email or Contact Number</label>
+                <input type="text" id="identifier" name="identifier" required placeholder="Enter your email or contact number" />
+            </div>
+            <button type="submit" class="btn btn-primary">Check Bookings</button>
+        </form>
+    </section>
+
+    {% if bookings is defined %}
+    <section class="container">
+        <h2>Your Bookings</h2>
+        {% if bookings %}
+            <table class="bookings-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Contact</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Registration Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking.name }}</td>
+                        <td>{{ booking.email }}</td>
+                        <td>{{ booking.contact }}</td>
+                        <td>{{ booking.check_in }}</td>
+                        <td>{{ booking.check_out }}</td>
+                        <td>{{ booking.registration_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No bookings found for the provided identifier.</p>
+        {% endif %}
+    </section>
+    {% endif %}
+</body>
+</html>

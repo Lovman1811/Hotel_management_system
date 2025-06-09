@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Add Room Status{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-plus"></i> Add Room Status</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="floor" class="form-label">Floor *</label>
+                        <select class="form-select" id="floor" name="floor" required onchange="loadRooms()">
+                            <option value="">Select Floor</option>
+                            {% for floor in floors %}
+                            <option value="{{ floor.floor_name }}">{{ floor.floor_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="room_number" class="form-label">Room Number *</label>
+                        <select class="form-select" id="room_number" name="room_number" required>
+                            <option value="">Select Room</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status *</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="">Select Status</option>
+                            <option value="Cleaned">Cleaned</option>
+                            <option value="Not Cleaned">Not Cleaned</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('housekeeping.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function loadRooms() {
+    const floor = document.getElementById('floor').value;
+    const roomSelect = document.getElementById('room_number');
+    
+    // Clear current options
+    roomSelect.innerHTML = '<option value="">Select Room</option>';
+    
+    if (floor) {
+        fetch(`/housekeeping/get-rooms/${floor}`)
+            .then(response => response.json())
+            .then(data => {
+                data.rooms.forEach(room => {
+                    const option = document.createElement('option');
+                    option.value = room;
+                    option.textContent = room;
+                    roomSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error loading rooms:', error));
+    }
+}
+</script>
+{% endblock %}

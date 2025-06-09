@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Account Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-calculator"></i> Account Management</h2>
+    <a href="{{ url_for('account.add') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Account Record
+    </a>
+</div>
+
+<!-- Account Records Table -->
+<div class="card">
+    <div class="card-header">
+        <h5>Account Records</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Emp ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Pay Date</th>
+                        <th>Basic Salary</th>
+                        <th>Allowances</th>
+                        <th>Deductions</th>
+                        <th>Net Pay</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                              <tbody>
+                    {% for account in accounts %}
+                    <tr>
+                        <td>{{ account.emp_id }}</td>
+                        <td>{{ account.full_name }}</td>
+                        <td>{{ account.department or 'N/A' }}</td>
+                        <td>{{ account.date }}</td>
+                        <td>₹{{ account.basic_salary }}</td>
+                        <td>₹{{ account.allowances }}</td>
+                        <td>₹{{ account.deductions }}</td>
+                        <td><strong>₹{{ account.net_pay }}</strong></td>
+                        <td>
+                            <a href="{{ url_for('account.edit', account_id=account.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{{ url_for('account.delete', account_id=account.id) }}"
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Are you sure you want to delete this record?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center">No account records found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

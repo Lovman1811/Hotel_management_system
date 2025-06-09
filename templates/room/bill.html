@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Room Bill{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4"><i class="fas fa-receipt"></i> Room Bill</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{% if category == 'error' %}danger{% else %}{{ category }}{% endif %} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% if bookings %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Contact</th>
+                    <th>Room Type</th>
+                    <th>Floor</th>
+                    <th>Room</th>
+                    <th>Stayed Days</th>
+                    <th>Room Charges</th>
+                    <th>Restaurant Charges</th>
+                    <th>Total Payment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking.id }}</td>
+                    <td>{{ booking.contact }}</td>
+                    <td>{{ booking.room_type }}</td>
+                    <td>{{ booking.floor }}</td>
+                    <td>{{ booking.room }}</td>
+                    <td>{{ booking.stayed_days }}</td>
+                    <td>{{ booking.room_charges }}</td>
+                    <td>{{ booking.restaurant_charges }}</td>
+                    <td>{{ booking.total_payment }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No bookings found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

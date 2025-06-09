@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Add Account Record{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-plus"></i> Add Account Record</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <!-- Personal Information Section -->
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">Personal Information</h5>
+                            
+                            <div class="mb-3">
+                                <label for="emp_id" class="form-label">Employee ID *</label>
+                                <select class="form-select" id="emp_id" name="emp_id" required onchange="fetchStaffData()">
+                                    <option value="">Select Employee</option>
+                                    {% for staff in staff_list %}
+                                    <option value="{{ staff.emp_id }}">{{ staff.emp_id }} - {{ staff.full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="full_name" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="full_name" name="full_name" required readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_type" class="form-label">ID Type *</label>
+                                <select class="form-select" id="id_type" name="id_type" required>
+                                    <option value="">Choose ID Type</option>
+                                    <option value="Aadharcard">Aadhar Card</option>
+                                    <option value="Pancard">PAN Card</option>
+                                    <option value="Driving Licence">Driving License</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_number" class="form-label">ID Number *</label>
+                                <input type="text" class="form-control" id="id_number" name="id_number" required readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="gender" class="form-label">Gender *</label>
+                                <select class="form-select" id="gender" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="contact" class="form-label">Contact *</label>
+                                <input type="tel" class="form-control" id="contact" name="contact" required readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address *</label>
+                                <textarea class="form-control" id="address" name="address" rows="3" required readonly></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Payroll Information Section -->
+                        <div class="col-md-6">
+                            <h5 class="text-success mb-3">Payroll Information</h5>
+                            
+                            <div class="mb-3">
+                                <label for="pay_date" class="form-label">Pay Date *</label>
+                                <input type="date" class="form-control" id="pay_date" name="pay_date" value="{{ today }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="basic_salary" class="form-label">Basic Salary *</label>
+                                <input type="number" step="0.01" class="form-control" id="basic_salary" name="basic_salary" required onchange="calculateNetPay()">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="allowances" class="form-label">Allowances</label>
+                                <input type="number" step="0.01" class="form-control" id="allowances" name="allowances" value="0" onchange="calculateNetPay()">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="deductions" class="form-label">Deductions</label>
+                                <input type="number" step="0.01" class="form-control" id="deductions" name="deductions" value="0" onchange="calculateNetPay()">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="net_pay" class="form-label">Net Pay</label>
+                                <input type="number" step="0.01" class="form-control" id="net_pay" name="net_pay" readonly>
+                                <div class="form-text">This will be calculated automatically</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('account.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Record
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function fetchStaffData() {
+    const empId = document.getElementById('emp_id').value;
+    
+    if (empId) {
+        fetch(`/account/fetch-staff/${empId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('full_name').value = data.data.full_name;
+                    document.getElementById('id_type').value = data.data.id_type;
+                    document.getElementById('id_number').value = data.data.id_number;
+                    document.getElementById('gender').value = data.data.gender;
+                    document.getElementById('contact').value = data.data.contact;
+                    document.getElementById('address').value = data.data.address;
+                    document.getElementById('basic_salary').value = data.data.salary;
+                    calculateNetPay();
+                } else {
+                    alert('Error fetching staff data: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error fetching staff data');
+            });
+    } else {
+        // Clear all fields
+        document.getElementById('full_name').value = '';
+        document.getElementById('id_type').value = '';
+        document.getElementById('id_number').value = '';
+        document.getElementById('gender').value = '';
+        document.getElementById('contact').value = '';
+        document.getElementById('address').value = '';
+        document.getElementById('basic_salary').value = '';
+        document.getElementById('net_pay').value = '';
+    }
+}
+
+function calculateNetPay() {
+    const basicSalary = parseFloat(document.getElementById('basic_salary').value) || 0;
+    const allowances = parseFloat(document.getElementById('allowances').value) || 0;
+    const deductions = parseFloat(document.getElementById('deductions').value) || 0;
+    
+    const netPay = basicSalary + allowances - deductions;
+    document.getElementById('net_pay').value = netPay.toFixed(2);
+}
+</script>
+{% endblock %}

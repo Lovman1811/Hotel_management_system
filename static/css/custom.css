@@ -1,0 +1,43 @@
+/* Custom styles for the hotel management system */
+.menu-item:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+.badge {
+    font-size: 0.8em;
+}
+
+.card {
+    margin-bottom: 1rem;
+}
+
+.table-responsive {
+    max-height: 400px;
+}
+
+/* Print styles */
+@media print {
+    .card-footer,
+    .btn,
+    .navbar,
+    .sidebar {
+        display: none !important;
+    }
+
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+
+    .content {
+        margin-left: 0;
+    }
+}

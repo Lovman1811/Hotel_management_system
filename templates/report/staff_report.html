@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Report{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-file-alt"></i> Staff Report</h2>
+</div>
+
+<!-- Search Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('report.search_staff_report') }}" class="row g-3">
+            <div class="col-md-3">
+                <select class="form-select" name="type">
+                    <option value="name" {% if search_type == 'name' %}selected{% endif %}>Search by Name</option>
+                    <option value="contact" {% if search_type == 'contact' %}selected{% endif %}>Search by Contact</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control" name="q" placeholder="Enter search term..." value="{{ search_query or '' }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <a href="{{ url_for('report.staff_report') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-refresh"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Staff Table -->
+<div class="card">
+    <div class="card-header">
+        <h5>Staff List</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Emp ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>Contact</th>
+                        <th>Gender</th>
+                        <th>Age</th>
+                        <th>Joining Date</th>
+                        <th>Salary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for staff_member in staff %}
+                    <tr>
+                        <td>{{ staff_member.emp_id }}</td>
+                        <td>{{ staff_member.full_name }}</td>
+                        <td>{{ staff_member.department }}</td>
+                        <td>{{ staff_member.designation }}</td>
+                        <td>{{ staff_member.contact }}</td>
+                        <td>{{ staff_member.gender }}</td>
+                        <td>{{ staff_member.age }}</td>
+                        <td>{{ staff_member.joining_date }}</td>
+                        <td>₹{{ staff_member.salary }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center">No staff found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

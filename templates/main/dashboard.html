@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Hotel Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            {% if user_type == 'Admin' %}
+                <i class="fas fa-user-shield"></i> Admin Dashboard
+            {% else %}
+                <i class="fas fa-user"></i> Staff Dashboard
+            {% endif %}
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Total Guests</div>
+            <div class="card-body">
+                <h4 class="card-title" id="total-guests">0</h4>
+                <p class="card-text">Registered guests</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Total Bookings</div>
+            <div class="card-body">
+                <h4 class="card-title" id="total-bookings">0</h4>
+                <p class="card-text">Room bookings</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Staff Members</div>
+            <div class="card-body">
+                <h4 class="card-title" id="total-staff">0</h4>
+                <p class="card-text">Active staff</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">Available Rooms</div>
+            <div class="card-body">
+                <h4 class="card-title" id="available-rooms">0</h4>
+                <p class="card-text">Ready for booking</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Quick Actions</div>
+            <div class="card-body">
+                <a href="{{ url_for('guest.add') }}" class="btn btn-primary me-2 mb-2">
+                    <i class="fas fa-user-plus"></i> Add Guest
+                </a>
+                <a href="{{ url_for('room.booking') }}" class="btn btn-success me-2 mb-2">
+                    <i class="fas fa-bed"></i> Book Room
+                </a>
+                {% if user_type == 'Admin' %}
+                <a href="{{ url_for('staff.add') }}" class="btn btn-warning me-2 mb-2">
+                    <i class="fas fa-user-tie"></i> Add Staff
+                </a>
+                {% endif %}
+                <a href="{{ url_for('restaurant.index') }}" class="btn btn-info me-2 mb-2">
+                    <i class="fas fa-utensils"></i> Restaurant
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Recent Activities</div>
+            <div class="card-body">
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <i class="fas fa-user-plus text-primary"></i>
+                        New guest registration
+                        <small class="text-muted float-end">2 hours ago</small>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fas fa-bed text-success"></i>
+                        Room booking confirmed
+                        <small class="text-muted float-end">4 hours ago</small>
+                    </div>
+                    <div class="list-group-item">
+                        <i class="fas fa-broom text-warning"></i>
+                        Room cleaning completed
+                        <small class="text-muted float-end">6 hours ago</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Online Bookings Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">Online Bookings</div>
+            <div class="card-body">
+                {% if online_bookings %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Contact</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Registration Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in online_bookings %}
+                        <tr>
+                            <td>{{ booking.name }}</td>
+                            <td>{{ booking.email }}</td>
+                            <td>{{ booking.contact }}</td>
+                            <td>{{ booking.check_in }}</td>
+                            <td>{{ booking.check_out }}</td>
+                            <td>{{ booking.registration_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No online bookings found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load dashboard statistics
+fetch('/api/dashboard-stats')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('total-guests').textContent = data.guests || 0;
+        document.getElementById('total-bookings').textContent = data.bookings || 0;
+        document.getElementById('total-staff').textContent = data.staff || 0;
+        document.getElementById('available-rooms').textContent = data.rooms || 0;
+    })
+    .catch(error => console.error('Error loading stats:', error));
+</script>
+{% endblock %}
